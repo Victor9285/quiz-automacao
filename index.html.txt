@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quiz - Automação no Mercado de Trabalho</title>
+  <style>
+    :root{
+      --bg:#0f172a;
+      --card:#111827;
+      --accent:#38bdf8;
+      --accent2:#22c55e;
+      --text:#e5e7eb;
+      --muted:#94a3b8;
+      --danger:#fb7185;
+      --border:#1f2937;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:linear-gradient(135deg,#0f172a,#111827 60%,#0b1220);
+      color:var(--text);
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+    }
+    .container{
+      width:100%;
+      max-width:780px;
+      background:rgba(17,24,39,.92);
+      border:1px solid var(--border);
+      border-radius:20px;
+      box-shadow:0 20px 60px rgba(0,0,0,.35);
+      overflow:hidden;
+    }
+    .header{
+      padding:28px 24px;
+      border-bottom:1px solid var(--border);
+      background:rgba(255,255,255,.02);
+    }
+    .header h1{
+      margin:0 0 8px;
+      font-size:clamp(24px,4vw,34px);
+    }
+    .header p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.5;
+    }
+    .content{padding:24px}
+    .progress{
+      width:100%;
+      height:10px;
+      background:#0b1220;
+      border-radius:999px;
+      overflow:hidden;
+      margin-bottom:20px;
+      border:1px solid var(--border);
+    }
+    .progress-bar{
+      height:100%;
+      width:0%;
+      background:linear-gradient(90deg,var(--accent),var(--accent2));
+      transition:width .3s ease;
+    }
+    .question-card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:18px;
+      padding:22px;
+      margin-bottom:18px;
+    }
+    .question-top{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:12px;
+    }
+    .q-number{
+      color:var(--accent);
+      font-weight:bold;
+    }
+    .q-text{
+      font-size:1.15rem;
+      line-height:1.5;
+      margin:0 0 18px;
+    }
+    .options{
+      display:grid;
+      gap:12px;
+    }
+    .option{
+      border:1px solid var(--border);
+      background:#0b1220;
+      color:var(--text);
+      padding:14px 16px;
+      border-radius:14px;
+      cursor:pointer;
+      text-align:left;
+      transition:.2s;
+      font-size:1rem;
+    }
+    .option:hover{
+      border-color:var(--accent);
+      transform:translateY(-1px);
+    }
+    .option.selected{
+      border-color:var(--accent);
+      background:rgba(56,189,248,.12);
+    }
+    .buttons{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+    button.action{
+      border:none;
+      padding:13px 18px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:bold;
+      font-size:1rem;
+    }
+    .next{background:var(--accent); color:#00111a;}
+    .prev{background:#334155; color:var(--text);}
+    .finish{background:var(--accent2); color:#052e16;}
+    .restart{background:#f59e0b; color:#1f1300;}
+    .hidden{display:none;}
+    .result{
+      text-align:center;
+      padding:30px 20px;
+    }
+    .result h2{
+      margin:0 0 12px;
+      font-size:2rem;
+    }
+    .result p{
+      color:var(--muted);
+      margin:8px 0;
+    }
+    .names{
+      margin-top:22px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      justify-content:center;
+    }
+    .name-tag{
+      background:rgba(56,189,248,.12);
+      border:1px solid rgba(56,189,248,.35);
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:999px;
+      font-weight:bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Quiz: Automação no Mercado de Trabalho</h1>
+      <p>Responda às 10 perguntas e finalize para ver o resultado.</p>
+    </div>
+
+    <div class="content">
+      <div id="quizView">
+        <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+
+        <div class="question-card">
+          <div class="question-top">
+            <div class="q-number" id="questionNumber">Pergunta 1 de 10</div>
+            <div class="q-number" id="scoreInfo">Acertos: 0</div>
+          </div>
+          <p class="q-text" id="questionText"></p>
+          <div class="options" id="optionsContainer"></div>
+          <div class="buttons">
+            <button class="action prev" id="prevBtn">Anterior</button>
+            <button class="action next" id="nextBtn">Próxima</button>
+            <button class="action finish hidden" id="finishBtn">Finalizar</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="resultView" class="result hidden">
+        <h2>Quiz finalizado</h2>
+        <p id="finalScore"></p>
+        <div class="names">
+          <div class="name-tag">Victor</div>
+          <div class="name-tag">Marcelo</div>
+          <div class="name-tag">Arthur</div>
+          <div class="name-tag">André</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      { q: "O que significa automação no trabalho?", o: ["Substituição total de pessoas em todas as funções", "Uso de tecnologia para executar tarefas com menos intervenção humana", "Trabalho manual sem ferramentas digitais", "Apenas uso de robôs industriais"], c: 1 },
+      { q: "Qual área costuma ser bastante impactada pela automação?", o: ["Tarefas repetitivas", "Somente artes visuais", "Apenas esportes", "Somente música"], c: 0 },
+      { q: "Um benefício comum da automação é:", o: ["Redução de produtividade", "Mais erros manuais", "Aumento de eficiência", "Fim de toda necessidade humana"], c: 2 },
+      { q: "Qual exemplo mostra automação no dia a dia?", o: ["Caixa eletrônico", "Lápis e papel", "Caderno de anotações", "Relógio analógico"], c: 0 },
+      { q: "A automação pode criar novos empregos?", o: ["Não, nunca cria", "Sim, especialmente em tecnologia e manutenção", "Só em profissões antigas", "Somente em agricultura"], c: 1 },
+      { q: "Qual habilidade tende a ser mais importante com a automação?", o: ["Decorar números aleatórios", "Pensamento crítico", "Escrever devagar", "Evitar tecnologia"], c: 1 },
+      { q: "A automação substitui melhor tarefas:", o: ["Criativas e subjetivas", "Repetitivas e padronizadas", "Que exigem empatia", "Que exigem julgamento humano complexo"], c: 1 },
+      { q: "Um risco da automação é:", o: ["Eliminar a necessidade de atualização profissional", "Aumentar a demanda por novas habilidades", "Desaparecimento de tarefas repetitivas", "Deslocamento de alguns empregos"], c: 3 },
+      { q: "Qual profissional pode ser muito importante na automação?", o: ["Técnico em manutenção", "Somente poeta", "Somente pintor", "Somente jornalista"], c: 0 },
+      { q: "A melhor postura diante da automação é:", o: ["Ignorar mudanças", "Aprender e se adaptar", "Parar de estudar", "Evitar tecnologia sempre"], c: 1 }
+    ];
+
+    let current = 0;
+    let score = 0;
+    const answers = Array(questions.length).fill(null);
+
+    const questionText = document.getElementById('questionText');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const questionNumber = document.getElementById('questionNumber');
+    const progressBar = document.getElementById('progressBar');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const finishBtn = document.getElementById('finishBtn');
+    const scoreInfo = document.getElementById('scoreInfo');
+    const quizView = document.getElementById('quizView');
+    const resultView = document.getElementById('resultView');
+    const finalScore = document.getElementById('finalScore');
+
+    function renderQuestion() {
+      const item = questions[current];
+      questionNumber.textContent = `Pergunta ${current + 1} de ${questions.length}`;
+      questionText.textContent = item.q;
+      optionsContainer.innerHTML = '';
+
+      item.o.forEach((opt, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'option' + (answers[current] === index ? ' selected' : '');
+        btn.textContent = opt;
+        btn.onclick = () => {
+          answers[current] = index;
+          updateScore();
+          renderQuestion();
+        };
+        optionsContainer.appendChild(btn);
+      });
+
+      progressBar.style.width = `${((current + 1) / questions.length) * 100}%`;
+      prevBtn.disabled = current === 0;
+      prevBtn.style.opacity = current === 0 ? 0.5 : 1;
+
+      nextBtn.classList.toggle('hidden', current === questions.length - 1);
+      finishBtn.classList.toggle('hidden', current !== questions.length - 1);
+
+      scoreInfo.textContent = `Acertos: ${score}`;
+    }
+
+    function updateScore() {
+      score = 0;
+      answers.forEach((ans, i) => {
+        if (ans === questions[i].c) score++;
+      });
+      scoreInfo.textContent = `Acertos: ${score}`;
+    }
+
+    prevBtn.onclick = () => {
+      if (current > 0) {
+        current--;
+        renderQuestion();
+      }
+    };
+
+    nextBtn.onclick = () => {
+      if (current < questions.length - 1) {
+        current++;
+        renderQuestion();
+      }
+    };
+
+    finishBtn.onclick = () => {
+      updateScore();
+      quizView.classList.add('hidden');
+      resultView.classList.remove('hidden');
+      finalScore.textContent = `Você acertou ${score} de ${questions.length} perguntas.`;
+    };
+
+    renderQuestion();
+  </script>
+</body>
+</html>
