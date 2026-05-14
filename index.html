@@ -17,7 +17,6 @@
     .question{padding:28px 24px;background:#f8fafc;border-radius:20px;border:1px solid #e2e8f0;margin-bottom:20px}
     .question-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
     .q-number{font-size:18px;font-weight:600;color:#1e293b}
-    .score{font-size:16px;color:#64748b;font-weight:500}
     .question-text{font-size:18px;line-height:1.6;color:#0f172a;margin-bottom:24px;font-weight:500}
     .options{display:grid;gap:12px}
     .option{padding:16px 20px;border:2px solid #e2e8f0;border-radius:16px;background:white;cursor:pointer;transition:all 0.2s;font-size:16px;font-weight:500;color:#475569}
@@ -51,14 +50,11 @@
     </div>
 
     <div class="content">
-      <!-- Quiz Area -->
       <div id="quiz-area">
         <div class="progress"><div class="progress-fill" id="progress"></div></div>
-        
         <div class="question" id="question-container">
           <div class="question-header">
             <div class="q-number" id="q-number">1 de 10</div>
-            <div class="score" id="score">Acertos: 0</div>
           </div>
           <div class="question-text" id="question"></div>
           <div class="options" id="options"></div>
@@ -70,7 +66,6 @@
         </div>
       </div>
 
-      <!-- Result Area -->
       <div id="result-area" class="result hidden">
         <h2>Quiz Concluído!</h2>
         <div class="result-score" id="final-score">0/10</div>
@@ -109,7 +104,6 @@
       question:document.getElementById('question'),
       options:document.getElementById('options'),
       number:document.getElementById('q-number'),
-      scoreEl:document.getElementById('score'),
       progress:document.getElementById('progress'),
       prev:document.getElementById('prev'),
       next:document.getElementById('next'),
@@ -117,12 +111,15 @@
       finalScore:document.getElementById('final-score')
     };
 
+    function updateScore(){
+      score=answers.filter((a,i)=>a===questions[i].c).length;
+    }
+
     function render(){
       const q=questions[current];
       els.number.textContent=`${current+1} de 10`;
       els.question.textContent=q.q;
       els.options.innerHTML='';
-      
       q.o.forEach((opt,i)=>{
         const btn=document.createElement('button');
         btn.className='option'+(answers[current]===i?' selected':'');
@@ -130,22 +127,15 @@
         btn.onclick=()=>select(i);
         els.options.appendChild(btn);
       });
-      
       els.progress.style.width=`${(current+1)/10*100}%`;
       els.prev.disabled=current===0;
       els.next.classList.toggle('hidden',current===9);
       els.finish.classList.toggle('hidden',current!==9);
-      updateScore();
     }
 
     function select(i){
       answers[current]=i;
       render();
-    }
-
-    function updateScore(){
-      score=answers.filter((a,i)=>a===questions[i].c).length;
-      els.scoreEl.textContent=`Acertos: ${score}`;
     }
 
     els.prev.onclick=()=>current>0&&(current--,render());
